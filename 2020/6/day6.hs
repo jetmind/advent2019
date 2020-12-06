@@ -8,7 +8,7 @@ yesAnyone = sum . map (length . Set.fromList) . map (replace "\n" "") . splitOn 
 
 yesEveryone input = sum $ map length common
   where groups = splitOn "\n\n" input
-        sets   = map (map Set.fromList . filter (not . null) . splitOn "\n") groups
+        sets   = map (map Set.fromList . lines) groups
         common = map (\(x:xs) -> foldr Set.intersection x xs) sets
 
 
