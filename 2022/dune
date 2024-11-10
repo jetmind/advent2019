@@ -1,5 +1,5 @@
 (executables
- (names day01 day02 day03 day04 day05 day06 day07 day08)
+ (names day01 day02 day03 day04 day05 day06 day07 day08 day09)
  (libraries base stdio str)
  (preprocess
-  (pps ppx_deriving.show)))
+  (pps ppx_deriving.show ppx_jane)))
