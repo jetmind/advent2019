@@ -8,6 +8,7 @@ type monkey_t = {
   items:     int list;
   op:        int -> int;
   test:      int -> bool;
+  divider:   int;
   on_true:   monkey_id_t;
   on_false:  monkey_id_t;
   inspect_n: int;
@@ -48,6 +49,7 @@ let parse_monkey lines =
         items     = parse_ints items_l;
         op        = parse_op op_l;
         test      = parse_test test_l;
+        divider   = parse_int test_l;
         on_true   = parse_int true_l;
         on_false  = parse_int false_l;
         inspect_n = 0;
@@ -89,11 +91,14 @@ let throw monkey_map from_id to_id worry_level =
   m2
 
 let inspect monkey_map monkey_id =
+  (* divider trick to keep worry level from growing indefinitely
+     https://jactl.io/blog/2023/04/17/advent-of-code-2022-day11.html *)
+  let divider_product = Map.fold ~init:1 ~f:(fun ~key:_ ~data acc -> acc * data.divider) monkey_map in
   let m = Map.find_exn monkey_map monkey_id in
   match m.items with
   | []        -> failwith "monkey is empty"
   | item :: _ ->
-    let worry_level = m.op item / 3 in
+    let worry_level = m.op item % divider_product in
     let throw_to_id = if m.test worry_level then m.on_true else m.on_false in
     let m = Map.update monkey_map monkey_id ~f:inspect_inc in
     throw m monkey_id throw_to_id worry_level
@@ -123,7 +128,7 @@ let show m =
   m |> Map.to_alist |> [%show: (int * monkey_t) list]
 
 let before = "input11.txt" |> In_channel.read_all |> parse_all
-let after  = before |> run 20 0
+let after  = before |> run 10000 0
 let _ = before |> show |> print_endline
 let _ = after  |> show |> print_endline
 let _ = after  |> calc_monkey_business |> printf "%i\n"
