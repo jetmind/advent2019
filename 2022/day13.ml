@@ -4,7 +4,7 @@ open Stdio
 type packet =
   | Int of int
   | List of packet list
-  [@@deriving show]
+  [@@deriving show, equal]
 
 let parse_packet s =
   let rec parse_next = function
@@ -33,10 +33,6 @@ let parse_packet s =
   let chars = String.to_list s in
   let parsed, _ = parse_next chars in parsed
 
-let parse_input s =
-  let open List in
-  s |> String.split_lines |> filter ~f:(Fn.non String.is_empty) |> chunks_of ~length:2 |> map ~f:(fun l -> parse_packet (List.nth_exn l 0), parse_packet (List.nth_exn l 1))
-
 let rec cmp = function
   | Int a, Int b when a < b -> `Lt
   | Int a, Int b when a > b -> `Gt
@@ -53,14 +49,27 @@ let rec cmp = function
     in res
   | p -> failwith (String.concat [([%show: packet * packet] p); "deez nuts"])
 
-let solve1 packets =
-  packets
-  |> List.map ~f:cmp
-  |> List.filter_mapi ~f:(fun i res -> match res with `Lt -> Some (i + 1) | _ -> None)
-  |> List.sum (module Int) ~f:Fn.id
+let solve1 str =
+  let open List in
+  str |> String.split_lines |> filter ~f:(Fn.non String.is_empty) |> chunks_of ~length:2
+  |> map ~f:(fun l -> parse_packet (List.nth_exn l 0), parse_packet (List.nth_exn l 1))
+  |> map ~f:cmp
+  |> filter_mapi ~f:(fun i res -> match res with `Lt -> Some (i + 1) | _ -> None)
+  |> sum (module Int) ~f:Fn.id
 
-(* let () = parse_packet "[[[[8,6,4,9],10]],[],[0,7,[[0,4,2,0],4,[7,5,4],10],3,[[2,1,6,1],8]]]" |> show_packet |> print_endline *)
-let inpex = "input13ex.txt" |> In_channel.read_all |> parse_input
-let inp1 = "input13.txt" |> In_channel.read_all |> parse_input
+let solve2 str =
+  let open List in
+  let inp = str |> String.split_lines |> filter ~f:(Fn.non String.is_empty) |> map ~f:parse_packet in
+  let d1 = parse_packet "[[2]]" in
+  let d2 = parse_packet "[[6]]" in
+  (d1::d2::inp)
+  |> sort ~compare:(fun a b -> match cmp (a, b) with | `Eq -> 0 | `Lt -> -1 | `Gt -> 1)
+  |> filter_mapi ~f:(fun i p -> if equal_packet p d1 || equal_packet p d2 then Some (i + 1) else None)
+  |> List.fold ~init:1 ~f:( * )
+
+let inpex = "input13ex.txt" |> In_channel.read_all
+let inp1 = "input13.txt" |> In_channel.read_all
 let () = inpex |> solve1 |> Int.to_string |> print_endline
 let () = inp1 |> solve1 |> Int.to_string |> print_endline
+let () = inpex |> solve2 |> Int.to_string |> print_endline
+let () = inp1 |> solve2 |> Int.to_string |> print_endline
