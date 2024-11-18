@@ -2,3 +2,4 @@
 _build
 .lsp
 .clj-kondo
+.nrepl-port
