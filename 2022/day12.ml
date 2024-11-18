@@ -43,7 +43,7 @@ let minpath (grid : char array array) start goal =
       [(x + 1, y); (x - 1, y); (x, y + 1); (x, y - 1)]
       |> List.filter
          ~f:(fun move ->
-              not (Set.exists seen ~f:(IntPair.equal move)) &&
+              not (Set.mem seen move) &&
               inbounds move &&
               elevation move - elevation point <= 1)
     in
@@ -58,7 +58,7 @@ let minpath1 grid =
   minpath grid start goal |> Option.value_exn
 
 let minpath2 grid =
-  let starts = (find_points grid 'S') @ (find_points grid 'a')  in
+  let starts = (find_points grid 'S') @ (find_points grid 'a') in
   let goal = find_point grid 'E' in
   starts |> List.filter_map ~f:(fun s -> minpath grid s goal)
          |> List.min_elt ~compare:Int.compare
