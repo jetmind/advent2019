@@ -58,6 +58,31 @@ let solve1 lines =
     in
   move 0
 
+let solve2 lines =
+  let bag = List.fold ~init:(Hash_set.create (module IntPair)) ~f:all_points lines in
+  let ymax = Hash_set.fold ~init:0 ~f:(fun acc (_, y) -> max acc y) bag in
+  let start = (500, 0) in
+  let floor = 2 + ymax in
+  let rec move n =
+    let sand = ref start in
+    let stuck = ref false in
+    while not !stuck do
+      (* printf "stuck=%b, fell=%b, sand=%s\n" !stuck !fell ([%show: int * int] !sand); *)
+      let x, y  = !sand in
+      let down  = (x, y + 1) in
+      let left  = (x - 1, y + 1) in
+      let right = (x + 1, y + 1) in
+      if y + 1 >= floor then stuck := true
+      else if not (Hash_set.mem bag down)  then sand := down
+      else if not (Hash_set.mem bag left)  then sand := left
+      else if not (Hash_set.mem bag right) then sand := right
+      else stuck := true;
+    done;
+    if !stuck then Hash_set.add bag !sand;
+    if IntPair.equal !sand start then n + 1 else move (n + 1)
+    in
+  move 0
+
 let ex = "498,4 -> 498,6 -> 496,6
 503,4 -> 502,4 -> 502,9 -> 494,9"
 
@@ -65,3 +90,6 @@ let ex = "498,4 -> 498,6 -> 496,6
 let inp = In_channel.read_all "input14.txt"
 let () = ex  |> parse |> solve1 |> Int.to_string |> print_endline
 let () = inp |> parse |> solve1 |> Int.to_string |> print_endline
+
+let () = ex  |> parse |> solve2 |> Int.to_string |> print_endline
+let () = inp |> parse |> solve2 |> Int.to_string |> print_endline
