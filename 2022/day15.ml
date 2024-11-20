@@ -38,7 +38,30 @@ let solve1 row sensors =
         Set.union acc (Set.of_list (module IntPair) points))
   |> Set.length
 
+let perimeter mi ma {sensor = (x, y); dist; _} =
+  let open List in
+  let rplus  = range ~start:`inclusive ~stop:`exclusive in
+  let rminus = range ~start:`inclusive ~stop:`exclusive ~stride:(-1) in
+  let inbounds (x, y) = x >= mi && x <= ma && y >= mi && y <= ma in
+  let d = dist + 1 in
+  let zf a b = filter ~f:inbounds (zip_exn a b) in
+  let topleft  = zf (rplus (x - d) x) (rminus y (y - d)) in
+  let topright = zf (rplus x (x + d)) (rplus (y - d) y) in
+  let btmleft  = zf (rminus x (x - d)) (rminus (y + d) y) in
+  let btmright = zf (rminus (x + d) x) (rplus y (y + d)) in
+  concat [topleft; topright; btmleft; btmright]
+
+let solve2 mi ma sensors =
+  let open List in
+  let to_set = Set.of_list (module IntPair) in
+  let union_all = Set.union_list (module IntPair) in
+  let points = sensors |> map ~f:(perimeter mi ma)|> map ~f:to_set |> union_all in
+  let check point = for_all sensors ~f:(fun {sensor; dist; _} -> distance sensor point > dist) in
+  Set.filter points ~f:check |> Set.to_list |> map ~f:(fun (x, y) -> (x, y, x * 4000000 + y))
+
 let ex = In_channel.read_all "input15ex.txt"
 let inp = In_channel.read_all "input15.txt"
-let () = ex |> parse |> solve1 10 |> Int.to_string |> print_endline
-let () = inp |> parse |> solve1 2000000 |> Int.to_string |> print_endline
+let () = ex  |> parse |> solve1 10        |> Int.to_string |> print_endline
+let () = inp |> parse |> solve1 2000000   |> Int.to_string |> print_endline
+let () = ex  |> parse |> solve2 0 20      |> [%show: (int * int * int) list] |> print_endline
+let () = inp |> parse |> solve2 0 4000000 |> [%show: (int * int * int) list] |> print_endline
