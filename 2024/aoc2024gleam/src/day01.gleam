@@ -1,5 +1,3 @@
-import file_streams/file_stream as fs
-import file_streams/file_stream_error as fse
 import gleam/dict
 import gleam/function
 import gleam/int
@@ -7,19 +5,7 @@ import gleam/io
 import gleam/list
 import gleam/pair
 import gleam/string
-
-fn slurp_loop(f, res) {
-  case fs.read_line(f) {
-    Ok(line) -> slurp_loop(f, [line, ..res])
-    Error(fse.Eof) -> list.reverse(res)
-    _ -> panic as "can't read file"
-  }
-}
-
-fn slurp(filename) {
-  let assert Ok(f) = fs.open_read(filename)
-  slurp_loop(f, [])
-}
+import u.{lines}
 
 fn parse(lines) {
   let pairs =
@@ -58,8 +44,8 @@ fn solve2(lines) {
 }
 
 pub fn run() {
-  "input/01ex.txt" |> slurp |> solve1 |> int.to_string |> io.println
-  "input/01.txt" |> slurp |> solve1 |> int.to_string |> io.println
-  "input/01ex.txt" |> slurp |> solve2 |> int.to_string |> io.println
-  "input/01.txt" |> slurp |> solve2 |> int.to_string |> io.println
+  "input/01ex.txt" |> lines |> solve1 |> int.to_string |> io.println
+  "input/01.txt" |> lines |> solve1 |> int.to_string |> io.println
+  "input/01ex.txt" |> lines |> solve2 |> int.to_string |> io.println
+  "input/01.txt" |> lines |> solve2 |> int.to_string |> io.println
 }
