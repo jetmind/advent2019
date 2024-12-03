@@ -17,6 +17,10 @@ pub fn lines(filename) {
   lines_loop(f, [])
 }
 
+pub fn slurp(filename) {
+  filename |> lines |> s.join("\n")
+}
+
 pub fn to_int(s: String) -> Int {
   case int.parse(s) {
     Ok(n) -> n

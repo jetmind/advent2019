@@ -1,6 +1,7 @@
 import argv
 import day01
 import day02
+import day03
 import gleam/int
 import gleam/io
 
@@ -10,6 +11,7 @@ pub fn main() {
       case int.parse(day) {
         Ok(1) -> day01.run()
         Ok(2) -> day02.run()
+        Ok(3) -> day03.run()
         _ -> io.println("invalid day " <> day)
       }
     _ -> io.println("USAGE: gleam run <day>")
