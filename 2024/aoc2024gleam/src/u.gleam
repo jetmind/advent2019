@@ -27,3 +27,7 @@ pub fn to_int(s: String) -> Int {
     Error(Nil) -> panic as { "can't parse int from " <> s }
   }
 }
+
+pub fn to_int_list(line: String) -> List(Int) {
+  line |> s.split(",") |> list.map(to_int)
+}
