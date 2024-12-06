@@ -49,13 +49,22 @@ fn parse(file) {
   })
 }
 
-fn move(pos, dir) {
+fn is_outside(w, h, pos) {
   let Pos(x, y) = pos
-  case dir {
+  x < 0 || y < 0 || x >= w || y >= h
+}
+
+fn move(board: Board, dir) {
+  let Pos(x, y) = board.guard
+  let pos = case dir {
     UP -> Pos(x, y - 1)
     DOWN -> Pos(x, y + 1)
     LEFT -> Pos(x - 1, y)
     RIGHT -> Pos(x + 1, y)
+  }
+  case is_outside(board.width, board.height, pos) {
+    True -> None
+    False -> Some(pos)
   }
 }
 
@@ -68,41 +77,22 @@ fn nextdir(dir) {
   }
 }
 
-fn is_outside(w, h, pos) {
-  let Pos(x, y) = pos
-  x < 0 || y < 0 || x >= w || y >= h
-}
-
 fn path(board) {
-  let Board(
-    guard: guard,
-    dir: dir,
-    obstr: obstr,
-    seen: seen,
-    seendir: seendir,
-    ..,
-  ) = board
-  let pos = move(guard, dir)
-  case set.contains(seendir, #(pos, dir)) {
-    True -> None
-    False ->
-      case is_outside(board.width, board.height, pos) {
-        True -> Some(seen)
-        False -> {
-          let sd = set.insert(seendir, #(pos, dir))
+  let Board(dir: dir, obstr: obstr, seen: seen, seendir: seendir, ..) = board
+  case move(board, dir) {
+    None -> Some(seen)
+    Some(pos) ->
+      case set.contains(seendir, #(pos, dir)) {
+        True -> None
+        False ->
           case set.contains(obstr, pos) {
             True -> path(Board(..board, dir: nextdir(dir)))
-            False ->
-              path(
-                Board(
-                  ..board,
-                  seendir: sd,
-                  guard: pos,
-                  seen: set.insert(seen, pos),
-                ),
-              )
+            False -> {
+              let s = set.insert(seen, pos)
+              let sd = set.insert(seendir, #(pos, dir))
+              path(Board(..board, guard: pos, seen: s, seendir: sd))
+            }
           }
-        }
       }
   }
 }
