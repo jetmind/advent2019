@@ -82,17 +82,14 @@ fn path(board) {
   case move(board, dir) {
     None -> Some(seen)
     Some(pos) ->
-      case set.contains(seendir, #(pos, dir)) {
-        True -> None
-        False ->
-          case set.contains(obstr, pos) {
-            True -> path(Board(..board, dir: nextdir(dir)))
-            False -> {
-              let s = set.insert(seen, pos)
-              let sd = set.insert(seendir, #(pos, dir))
-              path(Board(..board, guard: pos, seen: s, seendir: sd))
-            }
-          }
+      case set.contains(seendir, #(pos, dir)), set.contains(obstr, pos) {
+        True, _ -> None
+        _, True -> path(Board(..board, dir: nextdir(dir)))
+        _, False -> {
+          let s = set.insert(seen, pos)
+          let sd = set.insert(seendir, #(pos, dir))
+          path(Board(..board, guard: pos, seen: s, seendir: sd))
+        }
       }
   }
 }
