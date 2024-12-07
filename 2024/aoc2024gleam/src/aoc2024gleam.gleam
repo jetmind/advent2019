@@ -8,20 +8,35 @@ import day06
 import day07
 import gleam/int
 import gleam/io
+import gleam/list
+
+const days = [
+  day01.run, day02.run, day03.run, day04.run, day05.run, day06.run, day07.run,
+]
+
+fn runall() {
+  list.each(days, fn(f) {
+    f()
+    io.println("---")
+  })
+}
+
+fn runday(day) {
+  let err = fn() { io.println_error("unknown day: " <> day) }
+  case int.parse(day) {
+    Error(Nil) -> err()
+    Ok(n) ->
+      case days |> list.drop(n - 1) |> list.first {
+        Error(Nil) -> err()
+        Ok(f) -> f()
+      }
+  }
+}
 
 pub fn main() {
   case argv.load().arguments {
-    [day] ->
-      case int.parse(day) {
-        Ok(1) -> day01.run()
-        Ok(2) -> day02.run()
-        Ok(3) -> day03.run()
-        Ok(4) -> day04.run()
-        Ok(5) -> day05.run()
-        Ok(6) -> day06.run()
-        Ok(7) -> day07.run()
-        _ -> io.println("invalid day " <> day)
-      }
-    _ -> io.println("USAGE: gleam run <day>")
+    ["all"] -> runall()
+    [day] -> runday(day)
+    _ -> io.println_error("USAGE: gleam run <day|all>")
   }
 }

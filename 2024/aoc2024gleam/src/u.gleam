@@ -1,25 +1,16 @@
-import file_streams/file_stream as fs
-import file_streams/file_stream_error as fse
 import gleam/int
 import gleam/list
 import gleam/regexp as re
 import gleam/string as s
-
-fn lines_loop(f, res) {
-  case fs.read_line(f) {
-    Ok(line) -> lines_loop(f, [s.trim(line), ..res])
-    Error(fse.Eof) -> list.reverse(res)
-    _ -> panic as "can't read file"
-  }
-}
+import simplifile as f
 
 pub fn lines(filename) {
-  let assert Ok(f) = fs.open_read(filename)
-  lines_loop(f, [])
+  filename |> slurp |> s.trim |> s.split(on: "\n")
 }
 
 pub fn slurp(filename) {
-  filename |> lines |> s.join("\n")
+  let assert Ok(content) = f.read(from: filename)
+  content
 }
 
 pub fn to_int(s: String) -> Int {
