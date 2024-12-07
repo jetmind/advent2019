@@ -2,6 +2,7 @@ import file_streams/file_stream as fs
 import file_streams/file_stream_error as fse
 import gleam/int
 import gleam/list
+import gleam/regexp as re
 import gleam/string as s
 
 fn lines_loop(f, res) {
@@ -29,5 +30,6 @@ pub fn to_int(s: String) -> Int {
 }
 
 pub fn to_int_list(line: String) -> List(Int) {
-  line |> s.split(",") |> list.map(to_int)
+  let assert Ok(re) = re.from_string("[\\s,]+")
+  line |> re.split(with: re) |> list.map(to_int)
 }
