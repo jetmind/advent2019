@@ -6,6 +6,7 @@ import day04
 import day05
 import day06
 import day07
+import day2023_09
 import gleam/int
 import gleam/io
 import gleam/list
@@ -37,6 +38,8 @@ pub fn main() {
   case argv.load().arguments {
     ["all"] -> runall()
     [day] -> runday(day)
-    _ -> io.println_error("USAGE: gleam run <day|all>")
+    ["2024", day] -> runday(day)
+    ["2023", "9"] -> day2023_09.run()
+    _ -> io.println_error("USAGE: gleam run [year] <day|all>")
   }
 }
