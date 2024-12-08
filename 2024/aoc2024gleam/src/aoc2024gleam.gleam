@@ -6,6 +6,7 @@ import day04
 import day05
 import day06
 import day07
+import day08
 import day2023_09
 import gleam/int
 import gleam/io
@@ -13,6 +14,7 @@ import gleam/list
 
 const days = [
   day01.run, day02.run, day03.run, day04.run, day05.run, day06.run, day07.run,
+  day08.run,
 ]
 
 fn runall() {

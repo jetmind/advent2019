@@ -4,6 +4,28 @@ import gleam/regexp as re
 import gleam/string as s
 import simplifile as f
 
+pub type Point {
+  Point(char: String, x: Int, y: Int)
+}
+
+pub type Grid {
+  Grid(points: List(Point), height: Int, width: Int)
+}
+
+pub fn grid(filename) {
+  let lines = filename |> lines |> list.map(s.split(_, ""))
+  let assert Ok(line) = list.first(lines)
+  let h = list.length(lines)
+  let w = list.length(line)
+  let points =
+    lines
+    |> list.index_map(fn(line, y) {
+      line |> list.index_map(fn(char, x) { Point(char, x, y) })
+    })
+    |> list.flatten
+  Grid(points, h, w)
+}
+
 pub fn lines(filename) {
   filename |> slurp |> s.trim |> s.split(on: "\n")
 }
