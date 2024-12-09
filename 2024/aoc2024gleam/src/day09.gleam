@@ -7,21 +7,85 @@ import gleam/string
 import pprint as pp
 import u
 
-fn parse(input) {
+type Item {
+  Hole(n: Int)
+  File(n: Int, index: Int)
+}
+
+type InputDense =
+  dict.Dict(Int, Item)
+
+type InputSparse =
+  dict.Dict(Int, option.Option(Int))
+
+pub fn run() {
+  "2333133121414131402" |> solve1 |> pp.debug
+  "input/09.in" |> u.slurp |> solve1 |> pp.debug
+  "2333133121414131402" |> solve2 |> pp.debug
+  "input/09.in" |> u.slurp |> solve2 |> pp.debug
+  Nil
+}
+
+fn solve1(input) {
+  let d = input |> parse |> unfold
+  let t = dict.size(d) - 1
+  d |> moveblocks(0, t) |> checksum
+}
+
+fn solve2(input) {
+  let disk = parse(input)
+  let tail = dict.size(disk) - 1
+  list.range(tail, 0)
+  |> list.fold(disk, fn(disk, tail) { movefiles(disk, 0, tail) })
+  // |> pr
+  |> unfold
+  |> checksum
+}
+
+fn parse(input: String) -> InputDense {
   input
   |> string.split("")
   |> list.index_map(fn(n, i) {
+    let n = u.to_int(n)
     let file_index = i / 2
-    let item = case i % 2 == 0 {
-      True -> Some(file_index)
-      False -> None
+    case i % 2 == 0 {
+      True -> #(i, File(n, file_index))
+      False -> #(i, Hole(n))
     }
-    list.repeat(item, times: u.to_int(n))
+  })
+  |> dict.from_list
+}
+
+fn to_list(disk: InputDense) -> List(Item) {
+  disk
+  |> dict.to_list
+  |> list.sort(fn(a, b) { int.compare(pair.first(a), pair.first(b)) })
+  |> list.map(pair.second)
+}
+
+fn unfold(disk: InputDense) -> InputSparse {
+  to_list(disk)
+  |> list.map(fn(item) {
+    case item {
+      File(n, i) -> list.repeat(Some(i), n)
+      Hole(n) -> list.repeat(None, n)
+    }
   })
   |> list.flatten
   |> list.index_fold(dict.new(), fn(acc, item, index) {
     acc |> dict.insert(index, item)
   })
+}
+
+fn pr(disk: InputDense) -> String {
+  to_list(disk)
+  |> list.map(fn(item) {
+    case item {
+      File(n, i) -> string.repeat(int.to_string(i), n)
+      Hole(n) -> string.repeat(".", n)
+    }
+  })
+  |> string.concat
 }
 
 fn swap(a, x, y) {
@@ -30,7 +94,7 @@ fn swap(a, x, y) {
   a |> dict.insert(y, xv) |> dict.insert(x, yv)
 }
 
-fn moveblocks(d, head, tail) {
+fn moveblocks(d: InputSparse, head: Int, tail: Int) -> InputSparse {
   case head >= tail {
     True -> d
     False -> {
@@ -45,24 +109,13 @@ fn moveblocks(d, head, tail) {
   }
 }
 
-fn checksum(d) {
+fn checksum(d: InputSparse) {
   dict.fold(d, 0, fn(sum, i, item) {
     case item {
       Some(n) -> sum + n * i
       None -> sum
     }
   })
-}
-
-fn solve1(input) {
-  let d = parse(input)
-  let t = dict.size(d) - 1
-  d |> moveblocks(0, t) |> checksum
-}
-
-type Item {
-  Hole(n: Int)
-  File(n: Int, index: Int)
 }
 
 fn shiftinsert(d, idx, item) {
@@ -78,7 +131,7 @@ fn shiftinsert(d, idx, item) {
   |> dict.insert(idx, item)
 }
 
-fn movefiles(disk, head, tail) {
+fn movefiles(disk: InputDense, head: Int, tail: Int) -> InputDense {
   case head >= tail {
     True -> disk
     False -> {
@@ -89,78 +142,13 @@ fn movefiles(disk, head, tail) {
         File(..), _ -> movefiles(disk, head + 1, tail)
         Hole(hole), File(file, ..) if hole == file -> disk |> swap(head, tail)
         Hole(hole), File(file, ..) if hole > file -> {
-          // pp.debug(#(head, tail))
-          // pp.debug(#(hole, file, hole - file))
-          let nd =
-            disk
-            |> dict.insert(head, Hole(file))
-            |> swap(head, tail)
-            |> shiftinsert(head + 1, Hole(hole - file))
-          // pp.debug(dict.to_list(nd))
-          // pp.debug(dict.to_list(disk))
-          nd
+          disk
+          |> dict.insert(head, Hole(file))
+          |> swap(head, tail)
+          |> shiftinsert(head + 1, Hole(hole - file))
         }
         _, _ -> movefiles(disk, head + 1, tail)
       }
     }
   }
-}
-
-fn pr(disk) {
-  disk
-  |> dict.to_list
-  |> list.sort(fn(a, b) { int.compare(pair.first(a), pair.first(b)) })
-  |> list.map(pair.second)
-  |> list.map(fn(item) {
-    case item {
-      File(n, i) -> string.repeat(int.to_string(i), n)
-      Hole(n) -> string.repeat(".", n)
-    }
-  })
-  |> string.concat
-}
-
-fn unfold(disk) {
-  disk
-  |> dict.to_list
-  |> list.sort(fn(a, b) { int.compare(pair.first(a), pair.first(b)) })
-  |> list.map(pair.second)
-  |> list.map(fn(item) {
-    case item {
-      File(n, i) -> list.repeat(Some(i), n)
-      Hole(n) -> list.repeat(None, n)
-    }
-  })
-  |> list.flatten
-  |> list.index_fold(dict.new(), fn(acc, item, index) {
-    acc |> dict.insert(index, item)
-  })
-}
-
-fn solve2(input) {
-  let disk =
-    input
-    |> string.split("")
-    |> list.index_map(fn(n, i) {
-      let n = u.to_int(n)
-      let file_index = i / 2
-      case i % 2 == 0 {
-        True -> #(i, File(n, file_index))
-        False -> #(i, Hole(n))
-      }
-    })
-    |> dict.from_list
-  let tail = dict.size(disk) - 1
-  list.range(tail, 0)
-  |> list.fold(disk, fn(disk, tail) { movefiles(disk, 0, tail) })
-  |> unfold
-  |> checksum
-}
-
-pub fn run() {
-  "2333133121414131402" |> solve1 |> pp.debug
-  "input/09.in" |> u.slurp |> solve1 |> pp.debug
-  "2333133121414131402" |> solve2 |> pp.debug
-  "input/09.in" |> u.slurp |> solve2 |> pp.debug
-  Nil
 }
