@@ -27,12 +27,12 @@ pub fn grid(filename) {
 }
 
 pub fn lines(filename) {
-  filename |> slurp |> s.trim |> s.split(on: "\n")
+  filename |> slurp |> s.split(on: "\n")
 }
 
 pub fn slurp(filename) {
   let assert Ok(content) = f.read(from: filename)
-  content
+  content |> s.trim
 }
 
 pub fn to_int(s: String) -> Int {
