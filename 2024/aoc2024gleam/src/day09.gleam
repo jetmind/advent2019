@@ -77,16 +77,16 @@ fn unfold(disk: InputDense) -> InputSparse {
   })
 }
 
-fn pr(disk: InputDense) -> String {
-  to_list(disk)
-  |> list.map(fn(item) {
-    case item {
-      File(n, i) -> string.repeat(int.to_string(i), n)
-      Hole(n) -> string.repeat(".", n)
-    }
-  })
-  |> string.concat
-}
+// fn pr(disk: InputDense) -> String {
+//   to_list(disk)
+//   |> list.map(fn(item) {
+//     case item {
+//       File(n, i) -> string.repeat(int.to_string(i), n)
+//       Hole(n) -> string.repeat(".", n)
+//     }
+//   })
+//   |> string.concat
+// }
 
 fn swap(a, x, y) {
   let assert Ok(xv) = dict.get(a, x)

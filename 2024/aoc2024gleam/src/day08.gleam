@@ -4,7 +4,10 @@ import gleam/list as l
 import gleam/set
 import gleam/yielder as yi
 import pprint as pp
-import u.{type Point, Point}
+import u
+
+type Point =
+  u.Point(String)
 
 fn solve1(file) {
   let grid = u.grid(file)
@@ -18,7 +21,7 @@ fn solve1(file) {
       let #(p1, p2) = pair
       let dx = p2.x - p1.x
       let dy = p2.y - p1.y
-      [Point("#", p2.x + dx, p2.y + dy), Point("#", p1.x - dx, p1.y - dy)]
+      [u.Point("#", p2.x + dx, p2.y + dy), u.Point("#", p1.x - dx, p1.y - dy)]
     })
   }
   grid.points
@@ -37,7 +40,7 @@ fn solve2(file) {
     p.x >= 0 && p.y >= 0 && p.x < grid.width && p.y < grid.height
   }
   let next_antidote = fn(p: Point, dx, dy, op) {
-    Point("#", op(p.x, dx), op(p.y, dy))
+    u.Point("#", op(p.x, dx), op(p.y, dy))
   }
   let antidotes = fn(points) {
     points
