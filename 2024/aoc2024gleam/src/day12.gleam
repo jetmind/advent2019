@@ -7,8 +7,8 @@ import pprint as pp
 import u.{type Grid, Point}
 
 pub fn run() {
-  "input/12.ex" |> u.grid |> solve1 |> pp.debug
-  "input/12.in" |> u.grid |> solve1 |> pp.debug
+  "input/12.ex" |> u.grid |> u.time(solve1) |> pp.debug
+  "input/12.in" |> u.grid |> u.time(solve1) |> pp.debug
   Nil
 }
 

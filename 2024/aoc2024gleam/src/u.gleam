@@ -1,10 +1,21 @@
+import birl
+import birl/duration
 import gleam/dict.{type Dict}
 import gleam/function
 import gleam/int
 import gleam/list
 import gleam/regexp as re
 import gleam/string as s
+import pprint as pp
 import simplifile as f
+
+pub fn time(arg, f) {
+  let start = birl.now()
+  let res = f(arg)
+  let diff = birl.difference(birl.now(), start)
+  let _ = pp.debug(diff |> duration.accurate_decompose |> list.first)
+  res
+}
 
 pub type Point(a) {
   Point(char: a, x: Int, y: Int)

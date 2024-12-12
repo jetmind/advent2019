@@ -43,7 +43,7 @@ fn solve(list, iterations) {
 pub fn run() {
   "125 17" |> u.to_int_list |> solve(25) |> pp.debug
   let in = "5 62914 65 972 0 805922 6521 1639064" |> u.to_int_list
-  in |> solve(25) |> pp.debug
-  in |> solve(75) |> pp.debug
+  in |> u.time(solve(_, 25)) |> pp.debug
+  in |> u.time(solve(_, 75)) |> pp.debug
   Nil
 }
