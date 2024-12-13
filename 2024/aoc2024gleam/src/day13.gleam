@@ -1,4 +1,3 @@
-import gleam/function as f
 import gleam/int
 import gleam/list as l
 import gleam/regexp
@@ -9,42 +8,39 @@ import u
 pub fn run() {
   "input/13.ex" |> u.slurp |> parse |> u.time(solve1) |> pp.debug
   "input/13.in" |> u.slurp |> parse |> u.time(solve1) |> pp.debug
+  "input/13.in" |> u.slurp |> parse |> u.time(solve2) |> pp.debug
   Nil
 }
 
-type ClawMachine {
-  ClawMachine(xa: Int, ya: Int, xb: Int, yb: Int, xp: Int, yp: Int)
+fn solve1(machines) {
+  solve(0, machines)
 }
 
-fn solve1(machines: List(ClawMachine)) {
+fn solve2(machines) {
+  solve(10_000_000_000_000, machines)
+}
+
+fn solve(delta, machines) {
   l.map(machines, fn(m) {
-    l.range(0, 100)
-    |> l.filter_map(fn(b) {
-      let dividend = m.xp - b * m.xb
-      let divisible = dividend % m.xa == 0
-      let a = dividend / m.xa
-      case divisible {
-        True
-          if a >= 0
-          && a <= 100
-          && a * m.xa + b * m.xb == m.xp
-          && a * m.ya + b * m.yb == m.yp
-        -> Ok(a * 3 + b)
-        _ -> Error(Nil)
-      }
-    })
-    |> l.reduce(int.min)
+    let #(a, b, c, d, x, y) = m
+    let #(x, y) = #(x + delta, y + delta)
+    let aa = d * x - c * y
+    let bb = a * y - b * x
+    let dd = a * d - b * c
+    case aa % dd == 0 && bb % dd == 0 {
+      True -> aa / dd * 3 + bb / dd
+      False -> 0
+    }
   })
-  |> l.filter_map(f.identity)
   |> int.sum
 }
 
 fn parse(file) {
   let assert Ok(re) = regexp.from_string("[\\d]+")
   let parse1 = fn(block) {
-    let assert [xa, ya, xb, yb, xp, yp] =
+    let assert [a, b, c, d, x, y] =
       regexp.scan(re, block) |> l.map(fn(m) { u.to_int(m.content) })
-    ClawMachine(xa, ya, xb, yb, xp, yp)
+    #(a, b, c, d, x, y)
   }
   str.split(file, "\n\n") |> l.map(parse1)
 }
