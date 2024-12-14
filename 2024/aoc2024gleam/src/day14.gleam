@@ -1,7 +1,5 @@
-import gleam/int
 import gleam/io
 import gleam/list as l
-import gleam/order
 import gleam/pair
 import gleam/regexp
 import gleam/set
@@ -35,18 +33,14 @@ fn solve1(robots, w, h) {
 
 fn solve2(robots, w, h) {
   // the idea is: find a frame with max cluster of pixels which all have 4 neighbours
-  let assert Ok(#(sec, _)) =
+  let sec =
     l.range(1, 10_000)
     |> l.map(fn(sec) {
-      let longest = robots |> move(sec, w, h) |> cluster
-      #(sec, longest)
+      let max = robots |> move(sec, w, h) |> cluster
+      #(sec, max)
     })
-    |> l.reduce(fn(pair1, pair2) {
-      case int.compare(pair.second(pair1), pair.second(pair2)) {
-        order.Lt -> pair2
-        _ -> pair1
-      }
-    })
+    |> u.maxby(pair.second)
+    |> pair.first
   let res = robots |> move(sec, w, h)
   res |> render_text(w, h)
   res |> render_png(w, h)

@@ -4,6 +4,7 @@ import gleam/dict.{type Dict}
 import gleam/function
 import gleam/int
 import gleam/list
+import gleam/order
 import gleam/regexp as re
 import gleam/string as s
 import pprint as pp
@@ -81,4 +82,15 @@ pub fn to_int(s: String) -> Int {
 pub fn to_int_list(line: String) -> List(Int) {
   let assert Ok(re) = re.from_string("[\\s,]+")
   line |> re.split(with: re) |> list.map(to_int)
+}
+
+pub fn maxby(list, f) {
+  let assert Ok(res) =
+    list.reduce(list, fn(item1, item2) {
+      case int.compare(f(item1), f(item2)) {
+        order.Lt -> item2
+        _ -> item1
+      }
+    })
+  res
 }
