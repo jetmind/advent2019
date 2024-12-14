@@ -1,5 +1,3 @@
-import gleam/dict
-import gleam/function
 import gleam/int
 import gleam/io
 import gleam/list as l
@@ -36,10 +34,11 @@ fn solve1(robots, w, h) {
 }
 
 fn solve2(robots, w, h) {
-  let assert Ok(#(sec, _longest_hline)) =
+  // the idea is: find a frame with max cluster of pixels which all have 4 neighbours
+  let assert Ok(#(sec, _)) =
     l.range(1, 10_000)
     |> l.map(fn(sec) {
-      let longest = robots |> move(sec, w, h) |> longest_hline
+      let longest = robots |> move(sec, w, h) |> cluster
       #(sec, longest)
     })
     |> l.reduce(fn(pair1, pair2) {
@@ -54,30 +53,14 @@ fn solve2(robots, w, h) {
   sec
 }
 
-fn longest_hline(robots) {
-  let assert Ok(max) =
-    robots
-    |> l.group(pair.first)
-    |> dict.values
-    |> l.map(l.map(_, pair.second))
-    |> l.map(longest_segment)
-    |> l.reduce(int.max)
-  max
-}
-
-fn longest_segment(ints) {
-  let ints = ints |> l.sort(int.compare)
-  let shifted = l.drop(ints, 1)
-  let max =
-    l.map2(shifted, ints, int.subtract)
-    |> l.group(function.identity)
-    |> dict.values
-    |> l.map(l.length)
-    |> l.reduce(int.max)
-  case max {
-    Ok(max) -> max
-    Error(Nil) -> -1
-  }
+fn cluster(robots) {
+  let set = set.from_list(robots)
+  let has = set.contains(set, _)
+  robots
+  |> l.count(fn(robot) {
+    let #(x, y) = robot
+    has(#(x - 1, y)) && has(#(x + 1, y)) && has(#(x, y - 1)) && has(#(x, y + 1))
+  })
 }
 
 fn safety_factor(coords, w, h) {
