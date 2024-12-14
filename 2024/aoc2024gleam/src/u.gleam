@@ -1,7 +1,6 @@
 import birl
 import birl/duration
 import gleam/dict.{type Dict}
-import gleam/float
 import gleam/function
 import gleam/int
 import gleam/list
