@@ -3,10 +3,12 @@ import birl/duration
 import gleam/dict.{type Dict}
 import gleam/function
 import gleam/int
+import gleam/io
 import gleam/list
 import gleam/order
 import gleam/regexp as re
 import gleam/string as s
+import gleam/string_tree
 import pprint as pp
 import simplifile as f
 
@@ -93,4 +95,26 @@ pub fn maxby(list, f) {
       }
     })
   res
+}
+
+pub fn pr_map(map: Dict(#(Int, Int), String), w: Int, h: Int) -> String {
+  let sb = string_tree.new()
+  let yrange = list.range(0, h - 1)
+  let xrange = list.range(0, w - 1)
+  list.fold(yrange, sb, fn(sb, y) {
+    list.fold(xrange, sb, fn(sb, x) {
+      let char = case dict.get(map, #(x, y)) {
+        Ok(char) -> char
+        Error(Nil) -> "."
+      }
+      string_tree.append(sb, char)
+    })
+    |> string_tree.append("\n")
+  })
+  |> string_tree.to_string()
+}
+
+pub fn print_map(map, w, h) {
+  io.println(pr_map(map, w, h))
+  map
 }
